@@ -1,0 +1,7 @@
+{
+    "version": "2.0",
+    "functions": [
+      "add_expense"
+    ],
+    "functionTimeout": "00:05:00"
+  }
