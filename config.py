@@ -1,0 +1,1 @@
+CATEGORIES = ['Food', 'Transport', 'Entertainment', 'Utilities', 'Other']

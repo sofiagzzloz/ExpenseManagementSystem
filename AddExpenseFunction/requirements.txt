@@ -1,0 +1,5 @@
+azure-functions==1.14.0
+azure-storage-blob==12.8.1
+sqlalchemy==2.0.18
+mysql-connector-python==8.0.31
+flask==2.2.2
