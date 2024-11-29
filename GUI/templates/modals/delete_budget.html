@@ -1,0 +1,24 @@
+<!-- templates/modals/delete_budget_modal.html -->
+<div class="modal fade" id="deleteBudgetModal" tabindex="-1" aria-labelledby="deleteBudgetModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteBudgetModalLabel">Delete Budget</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('delete_budget') }}" method="post">
+                    <div class="mb-3">
+                        <label for="userId" class="form-label">User ID</label>
+                        <input type="text" class="form-control" id="userId" name="userId" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="categoryId" class="form-label">Category ID</label>
+                        <input type="text" class="form-control" id="categoryId" name="categoryId" required>
+                    </div>
+                    <button type="submit" class="btn btn-danger">Delete Budget</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
