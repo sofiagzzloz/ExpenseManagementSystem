@@ -160,7 +160,8 @@ def delete_budget():
 @app.route('/add_expense', methods=['POST'])
 def add_expense():
     if 'username' not in session:
-        return jsonify({'error': 'User not logged in'}), 401
+        return redirect(url_for('login'))  # Redirect to login if user is not logged in
+
     data = {
         'username': session['username'],
         'amount': request.form['amount'],
@@ -170,9 +171,11 @@ def add_expense():
     }
     result = azure_function_request('AddExpense', method='POST', json=data)
     if result:
-        return jsonify({'message': 'Expense added successfully'}), 200
+        # Redirect back to the homepage after successfully adding an expense
+        return redirect(url_for('index'))
     else:
-        return jsonify({'error': 'Failed to add expense'}), 500
+        # Optionally, you can show an error message on the current page
+        return render_template('index.html', error="Failed to add expense.")
 
 @app.route('/view_expenses', methods=['GET'])
 def view_expenses():
