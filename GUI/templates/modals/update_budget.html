@@ -1,36 +1,30 @@
-<!-- templates/modals/update_budget_modal.html -->
 <div class="modal fade" id="updateBudgetModal" tabindex="-1" aria-labelledby="updateBudgetModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="updateBudgetModalLabel">Update Budget</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <form action="{{ url_for('update_budget') }}" method="post">
-                    <div class="mb-3">
-                        <label for="userId" class="form-label">User ID</label>
-                        <input type="text" class="form-control" id="userId" name="userId" required>
-                    </div>
-                    <div class="mb-3">
-                        <label for="categoryId" class="form-label">Category ID</label>
-                        <input type="text" class="form-control" id="categoryId" name="categoryId" required>
-                    </div>
+            <form action="/update_budget" method="POST">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="updateBudgetModalLabel">Update Budget for <span id="updateBudgetCategory"></span></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="categoryId" name="categoryId">
                     <div class="mb-3">
                         <label for="budgetLimit" class="form-label">New Budget Limit</label>
                         <input type="number" class="form-control" id="budgetLimit" name="budgetLimit" step="0.01" required>
                     </div>
                     <div class="mb-3">
-                        <label for="startDate" class="form-label">New Start Date</label>
+                        <label for="startDate" class="form-label">Start Date</label>
                         <input type="date" class="form-control" id="startDate" name="startDate" required>
                     </div>
                     <div class="mb-3">
-                        <label for="endDate" class="form-label">New End Date</label>
+                        <label for="endDate" class="form-label">End Date</label>
                         <input type="date" class="form-control" id="endDate" name="endDate" required>
                     </div>
-                    <button type="submit" class="btn btn-primary">Update Budget</button>
-                </form>
-            </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-warning btn-custom">Update Budget</button>
+                </div>
+            </form>
         </div>
     </div>
 </div>
