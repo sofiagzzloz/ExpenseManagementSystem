@@ -179,6 +179,7 @@ def view_expenses():
         'endDate': request.args.get('endDate')
     }
     result = azure_function_request('ViewExpense', method='GET', params=params)
+    logging.info(f"ViewExpenses response: {result}")  # Log response here
     if result:
         return jsonify(result), 200
     else:
