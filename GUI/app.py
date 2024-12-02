@@ -35,6 +35,8 @@ def azure_function_request(function_name, method='GET', params=None, json=None):
             response = requests.get(url, headers=headers, params=params)
         elif method == 'POST':
             response = requests.post(url, headers=headers, json=json)
+        elif method == 'PUT':  # Add support for PUT requests
+            response = requests.put(url, headers=headers, json=json)
         elif method == 'DELETE':
             response = requests.delete(url, headers=headers, params=params)
         else:
@@ -118,7 +120,7 @@ def view_budgets():
         logging.error("Failed to retrieve budgets.")
         return jsonify({'error': 'Failed to retrieve budgets', 'budgets': []}), 500
 
-@app.route('/update_budget', methods=['POST'])
+@app.route('/update_budget', methods=['PUT'])
 def update_budget():
     if 'username' not in session:
         return jsonify({'error': 'User not logged in'}), 401
@@ -129,7 +131,7 @@ def update_budget():
         'startDate': request.form['startDate'],
         'endDate': request.form['endDate']
     }
-    result = azure_function_request('UpdateBudget', method='POST', json=data)
+    result = azure_function_request('UpdateBudget', method='PUT', json=data)
     if result:
         return jsonify({'message': 'Budget updated successfully'}), 200
     else:
