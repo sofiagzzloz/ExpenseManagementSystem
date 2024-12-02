@@ -149,24 +149,36 @@
     <script>
         $(document).ready(function() {
             var table = $('#expensesTable').DataTable({
-                responsive: true,
-                columns: [
-                    { data: 'id' },
-                    { data: 'amount' },
-                    { data: 'date' },
-                    { data: 'description' },
-                    { data: 'category' },
-                    {
-                        data: null,
-                        render: function(data, type, row) {
-                            return `
-                                <button class="btn btn-warning btn-sm edit-expense">Edit</button>
-                                <button class="btn btn-danger btn-sm delete-expense">Delete</button>
-                            `;
+            responsive: true,
+            columns: [
+                { data: 'id' },
+                { data: 'amount' },
+                { data: 'date' },
+                { data: 'description' },
+                {
+                    data: 'categoryId', // Use categoryId from the data
+                    render: function(data, type, row) {
+                        // Map categoryId to category names
+                        switch (data) {
+                            case 1: return 'Food';
+                            case 2: return 'Transport';
+                            case 3: return 'Entertainment';
+                            case 4: return 'Other';
+                            default: return 'Unknown';
                         }
                     }
-                ]
-            });
+                },
+                {
+                    data: null,
+                    render: function(data, type, row) {
+                        return `
+                            <button class="btn btn-warning btn-sm edit-expense">Edit</button>
+                            <button class="btn btn-danger btn-sm delete-expense">Delete</button>
+                        `;
+                    }
+                }
+            ]
+        });
 
             function updateExpensesTable() {
                 $.ajax({
