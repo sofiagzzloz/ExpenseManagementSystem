@@ -1,0 +1,20 @@
+<!-- templates/modals/delete_expense_modal.html -->
+<div class="modal fade" id="deleteExpenseModal" tabindex="-1" aria-labelledby="deleteExpenseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteExpenseModalLabel">Delete Expense</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('delete_expense') }}" method="post">
+                    <div class="mb-3">
+                        <label for="id" class="form-label">Expense ID</label>
+                        <input type="text" class="form-control" id="id" name="id" required>
+                    </div>
+                    <button type="submit" class="btn btn-danger">Delete Expense</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
