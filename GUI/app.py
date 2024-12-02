@@ -59,10 +59,14 @@ def login():
     if request.method == 'POST':
         username = request.form['username']
         result = azure_function_request('GetUser', method='GET', params={'username': username})
+        
         if result and result.get('exists'):
+            # If the user exists, log them in and set the session
             session['username'] = username
-            return redirect(url_for('index'))
+            # Optionally, you can pass a success message here
+            return redirect(url_for('index'))  # Redirecting to the index page
         else:
+            # If the user doesn't exist, show an error message
             return render_template('login.html', error="User not found. Please sign up.")
     return render_template('login.html')
 
@@ -71,11 +75,13 @@ def signup():
     if request.method == 'POST':
         username = request.form['username']
         result = azure_function_request('AddUser', method='POST', json={'username': username})
-        if result and result.get('success'):
+        if result:
+            if result.get('error'):
+                return render_template('signup.html', error="Username already exists.")
             session['username'] = username
             return redirect(url_for('index'))
         else:
-            return render_template('signup.html', error="Username already exists or error occurred.")
+            return render_template('signup.html', error="Error occurred while signing up.")
     return render_template('signup.html')
 
 @app.route('/logout')
