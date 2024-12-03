@@ -10,7 +10,7 @@
                 <form action="{{ url_for('edit_expense') }}" method="post">
                     <div class="mb-3">
                         <label for="id" class="form-label">Expense ID</label>
-                        <input type="text" class="form-control" id="id" name="id" required>
+                        <input type="text" class="form-control" id="id" name="id" required readonly>
                     </div>
                     <div class="mb-3">
                         <label for="amount" class="form-label">New Amount</label>
@@ -25,8 +25,13 @@
                         <input type="text" class="form-control" id="description" name="description">
                     </div>
                     <div class="mb-3">
-                        <label for="categoryId" class="form-label">New Category ID</label>
-                        <input type="text" class="form-control" id="categoryId" name="categoryId">
+                        <label for="categoryId" class="form-label">New Category</label>
+                        <select class="form-control" id="categoryId" name="categoryId" required>
+                            <option value="1">Food</option>
+                            <option value="2">Transport</option>
+                            <option value="3">Entertainment</option>
+                            <option value="4">Other</option>
+                        </select>
                     </div>
                     <button type="submit" class="btn btn-warning">Edit Expense</button>
                 </form>
