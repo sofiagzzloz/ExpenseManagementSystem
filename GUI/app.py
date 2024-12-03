@@ -105,6 +105,8 @@ def set_budget():
         return jsonify({'message': 'Budget set successfully'}), 200
     else:
         return jsonify({'error': 'Failed to set budget'}), 500
+    
+    return render_template('index.html')
 
 @app.route('/view_budgets', methods=['GET'])
 def view_budgets():
@@ -125,11 +127,14 @@ def view_budgets():
     else:
         logging.error("Failed to retrieve budgets.")
         return jsonify({'error': 'Failed to retrieve budgets', 'budgets': []}), 500
+    
+    return render_template('index.html')
 
 @app.route('/update_budget', methods=['PUT'])
 def update_budget():
     if 'username' not in session:
         return jsonify({'error': 'User not logged in'}), 401
+
     data = {
         'username': session['username'],
         'categoryId': request.form['categoryId'],
@@ -137,11 +142,22 @@ def update_budget():
         'startDate': request.form['startDate'],
         'endDate': request.form['endDate']
     }
-    result = azure_function_request('UpdateBudget', method='PUT', json=data)
-    if result:
-        return jsonify({'message': 'Budget updated successfully'}), 200
-    else:
-        return jsonify({'error': 'Failed to update budget'}), 500
+    logging.info(f"Updating budget with data: {data}")
+
+    try:
+        result = azure_function_request('UpdateBudget', method='PUT', json=data)
+        logging.info(f"UpdateBudget response: {result}")
+
+        if result:
+            return jsonify({'message': 'Budget updated successfully'}), 200
+        else:
+            logging.error('Failed to update budget.')
+            return jsonify({'error': 'Failed to update budget'}), 500
+    except Exception as e:
+        logging.error(f"Error in /update_budget: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+    
+    return render_template('index.html')
 
 @app.route('/delete_budget', methods=['POST'])
 def delete_budget():
@@ -156,11 +172,13 @@ def delete_budget():
         return jsonify({'message': 'Budget deleted successfully'}), 200
     else:
         return jsonify({'error': 'Failed to delete budget'}), 500
+    
+    return render_template('index.html')
 
 @app.route('/add_expense', methods=['POST'])
 def add_expense():
     if 'username' not in session:
-        return redirect(url_for('login'))  # Redirect to login if user is not logged in
+        return jsonify({'error': 'User not logged in'}), 401  # Ensure JSON response for AJAX
 
     data = {
         'username': session['username'],
@@ -170,29 +188,44 @@ def add_expense():
         'categoryId': request.form['categoryId']
     }
     result = azure_function_request('AddExpense', method='POST', json=data)
+    
     if result:
-        # Redirect back to the homepage after successfully adding an expense
-        return redirect(url_for('index'))
+        # Return a JSON response for the frontend to handle dynamically
+        return jsonify({'message': 'Expense added successfully'}), 200
     else:
-        # Optionally, you can show an error message on the current page
-        return render_template('index.html', error="Failed to add expense.")
+        # Send an error response if the expense addition fails
+        return jsonify({'error': 'Failed to add expense'}), 500
+    
+    return render_template('index.html')
 
 @app.route('/view_expenses', methods=['GET'])
 def view_expenses():
     if 'username' not in session:
         return jsonify({'error': 'User not logged in'}), 401
+
     params = {
         'username': session['username'],
         'categoryId': request.args.get('categoryId'),
         'startDate': request.args.get('startDate'),
         'endDate': request.args.get('endDate')
     }
-    result = azure_function_request('ViewExpense', method='GET', params=params)
-    logging.info(f"ViewExpenses response: {result}")  # Log response here
-    if result:
-        return jsonify(result), 200
-    else:
-        return jsonify({'error': 'Failed to retrieve expenses', 'expenses': []}), 500
+    logging.info(f"Fetching expenses with params: {params}")
+
+    try:
+        result = azure_function_request('ViewExpense', method='GET', params=params)
+        logging.info(f"ViewExpenses response: {result}")
+
+        if result and 'data' in result:
+            # Map the 'data' key to 'expenses' for frontend compatibility
+            return jsonify({'expenses': result['data']}), 200
+        else:
+            logging.error('No data returned by Azure function or incorrect format.')
+            return jsonify({'error': 'Failed to retrieve expenses'}), 500
+    except Exception as e:
+        logging.error(f"Error in /view_expenses: {str(e)}")
+        return jsonify({'error': 'Internal server error'}), 500
+    
+    return render_template('index.html')
 
 @app.route('/edit_expense', methods=['POST'])
 def edit_expense():
@@ -211,6 +244,8 @@ def edit_expense():
         return jsonify({'message': 'Expense updated successfully'}), 200
     else:
         return jsonify({'error': 'Failed to update expense'}), 500
+    
+    return render_template('index.html')
 
 @app.route('/delete_expense', methods=['POST'])
 def delete_expense():
@@ -225,7 +260,8 @@ def delete_expense():
         return jsonify({'message': 'Expense deleted successfully'}), 200
     else:
         return jsonify({'error': 'Failed to delete expense'}), 500
+    
+    return render_template('index.html')
 
 if __name__ == '__main__':
     app.run(debug=True)
-

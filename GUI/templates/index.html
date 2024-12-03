@@ -71,7 +71,7 @@
                 <div class="col-md-3 mb-4">
                     <div class="budget-card">
                         <h4><i class="fas fa-utensils me-2"></i>Food</h4>
-                        <p class="budget-amount" id="food-budget">$0.00</p>
+                        <p class="budget-amount" id="food-budget">$0</p>
                         <button class="btn btn-primary btn-sm btn-custom mb-2 set-budget" data-bs-toggle="modal" data-bs-target="#setBudgetModal" data-category="1" data-category-name="Food">Set Budget</button>
                         <button class="btn btn-warning btn-sm btn-custom mb-2 update-budget" data-bs-toggle="modal" data-bs-target="#updateBudgetModal" data-category="1" data-category-name="Food">Update Budget</button>
                         <button class="btn btn-danger btn-sm btn-custom delete-budget" data-bs-toggle="modal" data-bs-target="#deleteBudgetModal" data-category="1" data-category-name="Food">Delete Budget</button>
@@ -80,7 +80,7 @@
                 <div class="col-md-3 mb-4">
                     <div class="budget-card">
                         <h4><i class="fas fa-bus me-2"></i>Transport</h4>
-                        <p class="budget-amount" id="transport-budget">$0.00</p>
+                        <p class="budget-amount" id="transport-budget">$0</p>
                         <button class="btn btn-primary btn-sm btn-custom mb-2 set-budget" data-bs-toggle="modal" data-bs-target="#setBudgetModal" data-category="2" data-category-name="Transport">Set Budget</button>
                         <button class="btn btn-warning btn-sm btn-custom mb-2 update-budget" data-bs-toggle="modal" data-bs-target="#updateBudgetModal" data-category="2" data-category-name="Transport">Update Budget</button>
                         <button class="btn btn-danger btn-sm btn-custom delete-budget" data-bs-toggle="modal" data-bs-target="#deleteBudgetModal" data-category="2" data-category-name="Transport">Delete Budget</button>
@@ -89,7 +89,7 @@
                 <div class="col-md-3 mb-4">
                     <div class="budget-card">
                         <h4><i class="fas fa-film me-2"></i>Entertainment</h4>
-                        <p class="budget-amount" id="entertainment-budget">$0.00</p>
+                        <p class="budget-amount" id="entertainment-budget">$0</p>
                         <button class="btn btn-primary btn-sm btn-custom mb-2 set-budget" data-bs-toggle="modal" data-bs-target="#setBudgetModal" data-category="3" data-category-name="Entertainment">Set Budget</button>
                         <button class="btn btn-warning btn-sm btn-custom mb-2 update-budget" data-bs-toggle="modal" data-bs-target="#updateBudgetModal" data-category="3" data-category-name="Entertainment">Update Budget</button>
                         <button class="btn btn-danger btn-sm btn-custom delete-budget" data-bs-toggle="modal" data-bs-target="#deleteBudgetModal" data-category="3" data-category-name="Entertainment">Delete Budget</button>
@@ -98,7 +98,7 @@
                 <div class="col-md-3 mb-4">
                     <div class="budget-card">
                         <h4><i class="fas fa-ellipsis-h me-2"></i>Other</h4>
-                        <p class="budget-amount" id="other-budget">$0.00</p>
+                        <p class="budget-amount" id="other-budget">$0</p>
                         <button class="btn btn-primary btn-sm btn-custom mb-2 set-budget" data-bs-toggle="modal" data-bs-target="#setBudgetModal" data-category="4" data-category-name="Other">Set Budget</button>
                         <button class="btn btn-warning btn-sm btn-custom mb-2 update-budget" data-bs-toggle="modal" data-bs-target="#updateBudgetModal" data-category="4" data-category-name="Other">Update Budget</button>
                         <button class="btn btn-danger btn-sm btn-custom delete-budget" data-bs-toggle="modal" data-bs-target="#deleteBudgetModal" data-category="4" data-category-name="Other">Delete Budget</button>
@@ -140,87 +140,216 @@
     {% include 'modals/edit_expense.html' %}
     {% include 'modals/delete_expense.html' %}
 
-    <!-- JavaScript -->
-    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
-    <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js"></script>
-    <script>
-        $(document).ready(function() {
-            var table = $('#expensesTable').DataTable({
+<!-- JavaScript -->
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.11.6/dist/umd/popper.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js"></script>
+<script>
+    $(document).ready(function () {
+        // Initialize DataTables for the expenses table
+        var table = $('#expensesTable').DataTable({
             responsive: true,
             columns: [
                 { data: 'id' },
                 { data: 'amount' },
                 { data: 'date' },
                 { data: 'description' },
-                {
-                    data: 'categoryId', // Use categoryId from the data
-                    render: function(data, type, row) {
-                        // Map categoryId to category names
-                        switch (data) {
-                            case 1: return 'Food';
-                            case 2: return 'Transport';
-                            case 3: return 'Entertainment';
-                            case 4: return 'Other';
-                            default: return 'Unknown';
-                        }
-                    }
-                },
+                { data: 'category' },
                 {
                     data: null,
-                    render: function(data, type, row) {
+                    render: function (data, type, row) {
                         return `
-                            <button class="btn btn-warning btn-sm edit-expense">Edit</button>
-                            <button class="btn btn-danger btn-sm delete-expense">Delete</button>
+                            <button class="btn btn-warning btn-sm edit-expense" data-id="${row.id}">Edit</button>
+                            <button class="btn btn-danger btn-sm delete-expense" data-id="${row.id}">Delete</button>
                         `;
                     }
                 }
             ]
         });
 
-            function updateExpensesTable() {
-                $.ajax({
-                    url: '/view_expenses',
-                    method: 'GET',
-                    success: function(response) {
-                        table.clear().rows.add(response.expenses).draw();
-                    },
-                    error: function(xhr) {
-                        console.error('Error fetching expenses:', xhr.responseJSON?.error || xhr.statusText);
-                    }
-                });
-            }
+        // Function to update budgets dynamically
+        function updateBudgetDisplay() {
+            console.log('Fetching budget data...');
+            $.ajax({
+                url: '/view_budgets',
+                method: 'GET',
+                success: function (response) {
+                    console.log('Budget response:', response); // Log the response
+                    if (response.budgets && response.budgets.length > 0) {
+                        response.budgets.forEach(function (budget) {
+                            const categoryId = budget.categoryId;
+                            const remaining = budget.budget_limit; // Adjust to show "remaining" if calculated in the backend
+                            const elementId = getCategoryName(categoryId) + '-budget';
 
-            function updateBudgetDisplay() {
-                $.ajax({
-                    url: '/view_budgets',
-                    method: 'GET',
-                    success: function(response) {
-                        response.budgets.forEach(function(budget) {
-                            $('#' + getCategoryName(budget.categoryId) + '-budget').text('$' + budget.budget_limit.toFixed(2));
+                            // Dynamically update the budget card
+                            if ($('#' + elementId).length) {
+                                $('#' + elementId).text('$' + remaining.toFixed(2));
+                            } else {
+                                console.error('Element not found for categoryId:', categoryId);
+                            }
                         });
+                    } else {
+                        console.log('No budgets found');
+                        $('.budget-amount').text('$0.00');
+                    }
+                },
+                error: function (xhr) {
+                    console.error('Error fetching budgets:', xhr.responseJSON ? xhr.responseJSON.error : xhr.statusText);
+                }
+            });
+        }
+
+        // Function to map categoryId to category name
+        function getCategoryName(categoryId) {
+            switch (categoryId) {
+                case 1: return 'food';
+                case 2: return 'transport';
+                case 3: return 'entertainment';
+                case 4: return 'other';
+                default: return '';
+            }
+        }
+
+        // Function to update the expenses table dynamically
+        function updateExpensesTable() {
+            $.ajax({
+                url: '/view_expenses',
+                method: 'GET',
+                success: function (response) {
+                    if (response.expenses) {
+                        table.clear().rows.add(response.expenses).draw();
+                    } else {
+                        console.error('Error: No expenses returned');
+                    }
+                },
+                error: function (xhr) {
+                    console.error('Error fetching expenses:', xhr.responseJSON?.error || xhr.statusText);
+                }
+            });
+        }
+
+        // Initial fetch of expenses
+        updateExpensesTable();
+
+        // Handle form submission for adding an expense
+        $('#addExpenseForm').on('submit', function (e) {
+            e.preventDefault(); // Prevent default form submission
+
+            const form = $(this);
+            const url = form.attr('action'); // Backend route
+            const method = form.attr('method'); // POST
+            const data = form.serialize(); // Serialize form data
+
+            $.ajax({
+                url: url,
+                method: method,
+                data: data,
+                success: function (response) {
+                    alert(response.message); // Show success message
+                    $('#addExpenseModal').modal('hide'); // Hide the modal
+                    updateExpensesTable(); // Refresh expenses table
+                },
+                error: function (xhr) {
+                    alert('Error: ' + (xhr.responseJSON?.error || xhr.statusText)); // Show error
+                }
+            });
+        });
+
+        // Handle updating a budget
+        $('#updateBudgetForm').on('submit', function (e) {
+            e.preventDefault(); // Prevent default form submission
+
+            const form = $(this);
+            const url = form.attr('action'); // Backend route
+            const data = form.serialize(); // Serialize form data
+
+            $.ajax({
+                url: url,
+                method: 'PUT', // Correct method
+                contentType: 'application/x-www-form-urlencoded', // Ensure proper content type for serialized data
+                data: data,
+                success: function (response) {
+                    alert(response.message); // Show success message
+                    $('#updateBudgetModal').modal('hide'); // Hide the modal
+                    updateBudgetDisplay(); // Refresh budget cards
+                },
+                error: function (xhr) {
+                    alert('Error: ' + (xhr.responseJSON?.error || xhr.statusText)); // Show error
+                }
+            });
+        });
+
+        // Handle deleting an expense
+        $('#expensesTable').on('click', '.delete-expense', function () {
+            var data = table.row($(this).parents('tr')).data();
+            if (confirm('Are you sure you want to delete this expense?')) {
+                $.ajax({
+                    url: '/delete_expense',
+                    method: 'POST',
+                    data: { id: data.id },
+                    success: function (response) {
+                        alert(response.message); // Show success message
+                        updateExpensesTable(); // Refresh expenses table
                     },
-                    error: function(xhr) {
-                        console.error('Error fetching budgets:', xhr.responseJSON?.error || xhr.statusText);
+                    error: function (xhr) {
+                        alert('Error: ' + (xhr.responseJSON?.error || xhr.statusText)); // Show error
                     }
                 });
             }
-
-            function getCategoryName(categoryId) {
-                switch (categoryId) {
-                    case 1: return 'food';
-                    case 2: return 'transport';
-                    case 3: return 'entertainment';
-                    case 4: return 'other';
-                    default: return '';
-                }
-            }
-
-            updateExpensesTable();
-            updateBudgetDisplay();
         });
+
+        // Handle editing an expense
+        $('#expensesTable').on('click', '.edit-expense', function () {
+            var data = table.row($(this).parents('tr')).data();
+            $('#editExpenseModal #id').val(data.id);
+            $('#editExpenseModal #amount').val(data.amount);
+            $('#editExpenseModal #date').val(data.date);
+            $('#editExpenseModal #description').val(data.description);
+            $('#editExpenseModal #categoryId').val(data.categoryId);
+            $('#editExpenseModal').modal('show');
+        });
+
+        // Handle form submission for editing an expense
+        $('#editExpenseForm').on('submit', function (e) {
+            e.preventDefault(); // Prevent default form submission
+
+            const form = $(this);
+            const url = form.attr('action'); // Backend route
+            const method = form.attr('method'); // POST
+            const data = form.serialize(); // Serialize form data
+
+            $.ajax({
+                url: url,
+                method: method,
+                data: data,
+                success: function (response) {
+                    alert(response.message); // Show success message
+                    $('#editExpenseModal').modal('hide'); // Hide the modal
+                    updateExpensesTable(); // Refresh expenses table
+                },
+                error: function (xhr) {
+                    alert('Error: ' + (xhr.responseJSON?.error || xhr.statusText)); // Show error
+                }
+            });
+        });
+
+        // Initial data fetch
+        updateBudgetDisplay();
+        updateExpensesTable();
+
+        // Modal population handlers for budget forms
+        $('#setBudgetModal, #updateBudgetModal, #deleteBudgetModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var categoryId = button.data('category');
+            var categoryName = button.data('category-name');
+            var modal = $(this);
+            modal.find('.modal-body #categoryId').val(categoryId);
+            modal.find('.modal-title span').text(categoryName);
+        });
+    });
+</script>
     </script>
 </body>
 </html>
