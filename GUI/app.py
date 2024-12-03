@@ -4,6 +4,7 @@ from azure.storage.blob import BlobServiceClient
 from dotenv import load_dotenv
 import os
 import logging
+import base64
 
 load_dotenv()
 
@@ -106,8 +107,6 @@ def set_budget():
         return jsonify({'message': 'Budget set successfully'}), 200
     else:
         return jsonify({'error': 'Failed to set budget'}), 500
-    
-    return render_template('index.html')
 
 @app.route('/view_budgets', methods=['GET'])
 def view_budgets():
@@ -129,7 +128,6 @@ def view_budgets():
         logging.error("Failed to retrieve budgets.")
         return jsonify({'error': 'Failed to retrieve budgets', 'budgets': []}), 500
     
-    return render_template('index.html')
 
 @app.route('/update_budget', methods=['PUT'])
 def update_budget():
@@ -158,7 +156,6 @@ def update_budget():
         logging.error(f"Error in /update_budget: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
     
-    return render_template('index.html')
 
 @app.route('/delete_budget', methods=['POST'])
 def delete_budget():
@@ -174,48 +171,27 @@ def delete_budget():
     else:
         return jsonify({'error': 'Failed to delete budget'}), 500
     
-    return render_template('index.html')
+    
 
 @app.route('/add_expense', methods=['POST'])
 def add_expense():
-    # Retrieve form data
-    amount = request.form.get('amount')
-    date = request.form.get('date')
-    description = request.form.get('description')
-    category_id = request.form.get('categoryId')
-    receipt_file = request.files.get('file')  # Optional file input
-
-    # Prepare the data for the AddExpense function
+    if 'username' not in session:
+        return jsonify({'error': 'User not logged in'}), 401
     data = {
-        'amount': amount,
-        'date': date,
-        'description': description,
-        'categoryId': category_id,
-        'username': session['username']  # Assume `username` is stored in session
+        'username': session['username'],
+        'amount': request.form['amount'],
+        'date': request.form['date'],
+        'description': request.form['description'],
+        'categoryId': request.form['categoryId']
     }
-
-    # Call the AddExpense Azure Function
-    expense_result = azure_function_request('AddExpense', method='POST', json=data)
-
-    if not expense_result or 'id' not in expense_result:
-        logging.error('Failed to add expense.')
-        return jsonify({'error': 'Failed to add expense'}), 500
-
-    expense_id = expense_result['id']  # Get the generated expense ID from the response
-
-    # Handle receipt upload if a file was provided
-    if receipt_file:
-        receipt_response = requests.post(
-            f"{AZURE_FUNCTIONS_BASE_URL}/AddReceipt",
-            headers={'x-functions-key': FUNCTION_KEYS['AddReceipt']},
-            files={'file': (receipt_file.filename, receipt_file.stream, receipt_file.mimetype)},
-            data={'expenseId': expense_id}
-        )
-        if receipt_response.status_code != 200:
-            logging.error('Receipt upload failed.')
-            return jsonify({'error': 'Expense added, but receipt upload failed.'}), 500
-
-    return jsonify({'message': 'Expense added successfully!'}), 200
+    result = azure_function_request('AddExpense', method='POST', json=data)
+    if request.headers.get('X-Requested-With') == 'XMLHttpRequest':
+        if result:
+            return jsonify({'message': 'Expense added successfully'}), 200
+        else:
+            return jsonify({'error': 'Failed to add expense'}), 500
+    else:
+        return redirect(url_for('index'))
 
 @app.route('/view_expenses', methods=['GET'])
 def view_expenses():
@@ -243,8 +219,7 @@ def view_expenses():
     except Exception as e:
         logging.error(f"Error in /view_expenses: {str(e)}")
         return jsonify({'error': 'Internal server error'}), 500
-    
-    return render_template('index.html')
+
 
 @app.route('/edit_expense', methods=['POST'])
 def edit_expense():
@@ -292,13 +267,15 @@ def delete_expense():
     else:
         return jsonify({'error': 'Failed to delete expense'}), 500
     
-    return render_template('index.html')
 
 @app.route('/add_receipt', methods=['POST'])
 def add_receipt():
     try:
-        expense_id = request.form['expenseId']
-        file = request.files['file']
+        logging.info(f"Form data: {request.form}")
+        logging.info(f"Files: {request.files}")
+
+        expense_id = request.form.get('expenseId')
+        file = request.files.get('file')
 
         if not expense_id or not file:
             return jsonify({"error": "Expense ID and file are required."}), 400
