@@ -156,7 +156,19 @@
                 { data: 'amount' },
                 { data: 'date' },
                 { data: 'description' },
-                { data: 'category' },
+                {
+                    data: 'categoryId', // Use categoryId from the data
+                    render: function(data, type, row) {
+                        // Map categoryId to category names
+                        switch (data) {
+                            case 1: return 'Food';
+                            case 2: return 'Transport';
+                            case 3: return 'Entertainment';
+                            case 4: return 'Other';
+                            default: return 'Unknown';
+                        }
+                    }
+                },
                 {
                     data: null,
                     render: function (data, type, row) {
