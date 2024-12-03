@@ -1,0 +1,22 @@
+<div class="modal fade" id="addReceiptModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <form id="addReceiptForm" enctype="multipart/form-data">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Receipt</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <input type="hidden" id="receiptExpenseId" name="expenseId">
+                    <div class="mb-3">
+                        <label for="receiptFile" class="form-label">Upload Receipt</label>
+                        <input type="file" class="form-control" id="receiptFile" name="file" required>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="submit" class="btn btn-success">Upload</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>

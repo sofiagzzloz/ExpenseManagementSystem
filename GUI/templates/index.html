@@ -107,10 +107,29 @@
             </div>
         </div>
 
+       
+
+        <div class="mb-4">
+            <h4>Total Expenses: <span id="totalExpenses">$0.00</span></h4>
+        </div>
+            <div class="d-flex justify-content-between mb-3">
+        <div class="input-group" style="max-width: 300px;">
+            <select id="dateFilter" class="form-select">
+                <option value="all">All Time</option>
+                <option value="today">Today</option>
+                <option value="lastWeek">Last Week</option>
+                <option value="lastMonth">Last Month</option>
+            </select>
+            <button id="applyFilter" class="btn btn-primary">Filter</button>
+        </div>
+    </div>
+
+        
+
         <!-- Expenses Section -->
         <div>
             <h2 class="mb-4">Expenses</h2>
-            <button class="btn btn-success mb-4 btn-custom" data-bs-toggle="modal" data-bs-target="#addExpenseModal"><i class="fas fa-plus me-2"></i>Add Expense</button>
+            <button class="btn btn-success mb-4 btn-custom" data-bs-toggle="modal" data-bs-target="#addExpenseModal"><i class="fas fa-plus me-2"></i>Add Expense</button> 
             <div id="expensesTableContainer">
                 <table id="expensesTable" class="table table-striped table-hover">
                     <thead>
@@ -120,17 +139,46 @@
                             <th>Date</th>
                             <th>Description</th>
                             <th>Category</th>
+                            <th>Receipt</th>
                             <th>Actions</th>
                         </tr>
                     </thead>
                     <tbody>
-                        <!-- Dynamically populated rows -->
+                        {% for expense in expenses %}
+                        <tr>
+                            <td>{{ expense.id }}</td>
+                            <td>{{ expense.amount }}</td>
+                            <td>{{ expense.date }}</td>
+                            <td>{{ expense.description }}</td>
+                            <td>
+                                {% if expense.categoryId == 1 %}
+                                    Food
+                                {% elif expense.categoryId == 2 %}
+                                    Transport
+                                {% elif expense.categoryId == 3 %}
+                                    Entertainment
+                                {% elif expense.categoryId == 4 %}
+                                    Other
+                                {% endif %}
+                            </td>
+                            <td>
+                                {% if expense.receiptUrl %}
+                                    <a href="{{ expense.receiptUrl }}" target="_blank" class="btn btn-primary btn-sm">View Receipt</a>
+                                {% else %}
+                                    <button class="btn btn-secondary btn-sm add-receipt" data-id="{{ expense.id }}" data-bs-toggle="modal" data-bs-target="#addReceiptModal">Add Receipt</button>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <button class="btn btn-warning btn-sm edit-expense" data-id="{{ expense.id }}">Edit</button>
+                                <button class="btn btn-danger btn-sm delete-expense" data-id="{{ expense.id }}">Delete</button>
+                            </td>
+                        </tr>
+                        {% endfor %}
                     </tbody>
                 </table>
             </div>
         </div>
     </div>
-
     <!-- Include modal templates -->
     {% include 'modals/username_modal.html' %}
     {% include 'modals/set_budget.html' %}
@@ -139,6 +187,7 @@
     {% include 'modals/add_expense.html' %}
     {% include 'modals/edit_expense.html' %}
     {% include 'modals/delete_expense.html' %}
+    {% include 'modals/add_receipt.html' %}
 
 <!-- JavaScript -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
@@ -148,38 +197,53 @@
 <script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap5.min.js"></script>
 <script>
     $(document).ready(function () {
-        // Initialize DataTables for the expenses table
-        var table = $('#expensesTable').DataTable({
-            responsive: true,
-            columns: [
-                { data: 'id' },
-                { data: 'amount' },
-                { data: 'date' },
-                { data: 'description' },
-                {
-                    data: 'categoryId', // Use categoryId from the data
-                    render: function(data, type, row) {
-                        // Map categoryId to category names
-                        switch (data) {
-                            case 1: return 'Food';
-                            case 2: return 'Transport';
-                            case 3: return 'Entertainment';
-                            case 4: return 'Other';
-                            default: return 'Unknown';
-                        }
-                    }
-                },
-                {
-                    data: null,
-                    render: function (data, type, row) {
-                        return `
-                            <button class="btn btn-warning btn-sm edit-expense" data-id="${row.id}">Edit</button>
-                            <button class="btn btn-danger btn-sm delete-expense" data-id="${row.id}">Delete</button>
-                        `;
+    // Initialize DataTables for the expenses table
+    var table = $('#expensesTable').DataTable({
+        responsive: true,
+        columns: [
+            { data: 'id', title: 'ID' }, // ID column
+            { data: 'amount', title: 'Amount' }, // Amount column
+            { data: 'date', title: 'Date' }, // Date column
+            { data: 'description', title: 'Description' }, // Description column
+            {
+                data: 'categoryId',
+                title: 'Category',
+                render: function (data) {
+                    // Map categoryId to category names
+                    switch (data) {
+                        case 1: return 'Food';
+                        case 2: return 'Transport';
+                        case 3: return 'Entertainment';
+                        case 4: return 'Other';
+                        default: return 'Unknown';
                     }
                 }
-            ]
-        });
+            },
+            {
+                data: null,
+                title: 'Receipt',
+                render: function (data, type, row) {
+                    // Check if receipt URL exists
+                    if (row.receiptUrl) {
+                        return `<a href="${row.receiptUrl}" target="_blank" class="btn btn-primary btn-sm">View Receipt</a>`;
+                    } else {
+                        return `<button class="btn btn-secondary btn-sm add-receipt" data-id="${row.id}" data-bs-toggle="modal" data-bs-target="#addReceiptModal">Add Receipt</button>`;
+                    }
+                }
+            },
+            {
+                data: null,
+                title: 'Actions',
+                render: function (data, type, row) {
+                    // Render edit and delete buttons
+                    return `
+                        <button class="btn btn-warning btn-sm edit-expense" data-id="${row.id}">Edit</button>
+                        <button class="btn btn-danger btn-sm delete-expense" data-id="${row.id}">Delete</button>
+                    `;
+                }
+            }
+        ]
+    });
 
         // Function to update budgets dynamically
         function updateBudgetDisplay() {
@@ -231,9 +295,17 @@
                 method: 'GET',
                 success: function (response) {
                     if (response.expenses) {
+                        // Clear the table and add new rows
                         table.clear().rows.add(response.expenses).draw();
+
+                        // Calculate the total amount
+                        let totalAmount = response.expenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
+
+                        // Update the total expenses display
+                        $('#totalExpenses').text('$' + totalAmount.toFixed(2));
                     } else {
                         console.error('Error: No expenses returned');
+                        $('#totalExpenses').text('$0.00'); // Reset total if no expenses
                     }
                 },
                 error: function (xhr) {
@@ -359,6 +431,84 @@
             var modal = $(this);
             modal.find('.modal-body #categoryId').val(categoryId);
             modal.find('.modal-title span').text(categoryName);
+        });
+    });
+
+        // Function to fetch filtered expenses
+    function fetchFilteredExpenses(filter) {
+        const filterParams = {};
+        if (filter === 'today') {
+            filterParams.startDate = new Date().toISOString().split('T')[0]; // Today's date
+        } else if (filter === 'lastWeek') {
+            const today = new Date();
+            const lastWeek = new Date(today.setDate(today.getDate() - 7));
+            filterParams.startDate = lastWeek.toISOString().split('T')[0];
+            filterParams.endDate = new Date().toISOString().split('T')[0];
+        } else if (filter === 'lastMonth') {
+            const today = new Date();
+            const lastMonth = new Date(today.setMonth(today.getMonth() - 1));
+            filterParams.startDate = lastMonth.toISOString().split('T')[0];
+            filterParams.endDate = new Date().toISOString().split('T')[0];
+        }
+
+        $.ajax({
+            url: '/view_expenses',
+            method: 'GET',
+            data: filterParams,
+            success: function (response) {
+                if (response.expenses) {
+                    table.clear().rows.add(response.expenses).draw();
+
+                    // Update the total amount
+                    const totalAmount = response.expenses.reduce((sum, expense) => sum + parseFloat(expense.amount), 0);
+                    $('#totalExpenses').text('$' + totalAmount.toFixed(2));
+                } else {
+                    table.clear().draw();
+                    $('#totalExpenses').text('$0.00'); // Reset total if no expenses
+                }
+            },
+            error: function (xhr) {
+                console.error('Error fetching filtered expenses:', xhr.responseJSON?.error || xhr.statusText);
+            }
+        });
+    }
+
+    // Event listener for the filter button
+    $('#applyFilter').on('click', function () {
+        const selectedFilter = $('#dateFilter').val();
+        fetchFilteredExpenses(selectedFilter);
+    });
+
+
+    $(document).ready(function () {
+        // Event listener for "Add Receipt" button
+        $('#expensesTable').on('click', '.add-receipt', function () {
+    const expenseId = $(this).data('id');
+    $('#receiptExpenseId').val(expenseId);
+    $('#addReceiptModal').modal('show');
+});
+
+        // Handle "Add Receipt" form submission
+        $('#addReceiptForm').on('submit', function (e) {
+            e.preventDefault(); // Prevent default form submission
+
+            const formData = new FormData(this); // Create a FormData object with the form's data
+
+            $.ajax({
+                url: '/add_receipt', // Backend route for adding a receipt
+                method: 'POST',
+                data: formData,
+                processData: false, // Prevent jQuery from automatically processing the data
+                contentType: false, // Prevent jQuery from setting the content type
+                success: function (response) {
+                    alert(response.message); // Show success message
+                    $('#addReceiptModal').modal('hide'); // Hide the modal
+                    location.reload(); // Reload the page to reflect changes
+                },
+                error: function (xhr) {
+                    alert('Error: ' + (xhr.responseJSON?.error || xhr.statusText)); // Show error message
+                }
+            });
         });
     });
 </script>

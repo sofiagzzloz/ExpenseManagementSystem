@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify, session, redirect, url_for
 import requests
+from azure.storage.blob import BlobServiceClient
 from dotenv import load_dotenv
 import os
 import logging
@@ -177,26 +178,44 @@ def delete_budget():
 
 @app.route('/add_expense', methods=['POST'])
 def add_expense():
-    if 'username' not in session:
-        return jsonify({'error': 'User not logged in'}), 401  # Ensure JSON response for AJAX
+    # Retrieve form data
+    amount = request.form.get('amount')
+    date = request.form.get('date')
+    description = request.form.get('description')
+    category_id = request.form.get('categoryId')
+    receipt_file = request.files.get('file')  # Optional file input
 
+    # Prepare the data for the AddExpense function
     data = {
-        'username': session['username'],
-        'amount': request.form['amount'],
-        'date': request.form['date'],
-        'description': request.form['description'],
-        'categoryId': request.form['categoryId']
+        'amount': amount,
+        'date': date,
+        'description': description,
+        'categoryId': category_id,
+        'username': session['username']  # Assume `username` is stored in session
     }
-    result = azure_function_request('AddExpense', method='POST', json=data)
-    
-    if result:
-        # Return a JSON response for the frontend to handle dynamically
-        return jsonify({'message': 'Expense added successfully'}), 200
-    else:
-        # Send an error response if the expense addition fails
+
+    # Call the AddExpense Azure Function
+    expense_result = azure_function_request('AddExpense', method='POST', json=data)
+
+    if not expense_result or 'id' not in expense_result:
+        logging.error('Failed to add expense.')
         return jsonify({'error': 'Failed to add expense'}), 500
-    
-    return render_template('index.html')
+
+    expense_id = expense_result['id']  # Get the generated expense ID from the response
+
+    # Handle receipt upload if a file was provided
+    if receipt_file:
+        receipt_response = requests.post(
+            f"{AZURE_FUNCTIONS_BASE_URL}/AddReceipt",
+            headers={'x-functions-key': FUNCTION_KEYS['AddReceipt']},
+            files={'file': (receipt_file.filename, receipt_file.stream, receipt_file.mimetype)},
+            data={'expenseId': expense_id}
+        )
+        if receipt_response.status_code != 200:
+            logging.error('Receipt upload failed.')
+            return jsonify({'error': 'Expense added, but receipt upload failed.'}), 500
+
+    return jsonify({'message': 'Expense added successfully!'}), 200
 
 @app.route('/view_expenses', methods=['GET'])
 def view_expenses():
@@ -274,6 +293,29 @@ def delete_expense():
         return jsonify({'error': 'Failed to delete expense'}), 500
     
     return render_template('index.html')
+
+@app.route('/add_receipt', methods=['POST'])
+def add_receipt():
+    try:
+        expense_id = request.form['expenseId']
+        file = request.files['file']
+
+        if not expense_id or not file:
+            return jsonify({"error": "Expense ID and file are required."}), 400
+
+        # Call Azure Function to handle receipt upload
+        files = {'file': (file.filename, file.stream, file.content_type)}
+        data = {'expenseId': expense_id}
+
+        response = azure_function_request('AddReceipt', method='POST', files=files, data=data)
+
+        if 'error' in response:
+            return jsonify({"error": response['error']}), 500
+
+        return jsonify({"message": "Receipt uploaded successfully!"})
+    except Exception as e:
+        logging.error(f"Error adding receipt: {str(e)}")
+        return jsonify({"error": "Internal server error"}), 500
 
 if __name__ == '__main__':
     app.run(debug=True)
