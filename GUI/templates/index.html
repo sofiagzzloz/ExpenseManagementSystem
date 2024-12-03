@@ -201,15 +201,14 @@
         var table = $('#expensesTable').DataTable({
             responsive: true,
             columns: [
-                { data: 'id', title: 'ID' }, // ID column
-                { data: 'amount', title: 'Amount' }, // Amount column
-                { data: 'date', title: 'Date' }, // Date column
-                { data: 'description', title: 'Description' }, // Description column
+                { data: 'id', title: 'ID' },
+                { data: 'amount', title: 'Amount' },
+                { data: 'date', title: 'Date' },
+                { data: 'description', title: 'Description' },
                 {
                     data: 'categoryId',
                     title: 'Category',
                     render: function (data) {
-                        // Map categoryId to category names
                         switch (data) {
                             case 1: return 'Food';
                             case 2: return 'Transport';
@@ -223,7 +222,6 @@
                     data: null,
                     title: 'Receipt',
                     render: function (data, type, row) {
-                        // Check if receipt URL exists
                         if (row.receiptUrl) {
                             return `<a href="${row.receiptUrl}" target="_blank" class="btn btn-primary btn-sm">View Receipt</a>`;
                         } else {
@@ -235,7 +233,6 @@
                     data: null,
                     title: 'Actions',
                     render: function (data, type, row) {
-                        // Render edit and delete buttons
                         return `
                             <button class="btn btn-warning btn-sm edit-expense" data-id="${row.id}">Edit</button>
                             <button class="btn btn-danger btn-sm delete-expense" data-id="${row.id}">Delete</button>
@@ -245,7 +242,7 @@
             ]
         });
 
-        // Update budgets dynamically
+        // Fetch and update budgets dynamically
         function updateBudgetDisplay() {
             $.ajax({
                 url: '/view_budgets',
@@ -256,7 +253,6 @@
                             const categoryId = budget.categoryId;
                             const remaining = budget.budget_limit;
                             const elementId = getCategoryName(categoryId) + '-budget';
-
                             if ($('#' + elementId).length) {
                                 $('#' + elementId).text('$' + remaining.toFixed(2));
                             }
@@ -282,7 +278,7 @@
             }
         }
 
-        // Update expenses table dynamically
+        // Fetch and update expenses dynamically
         function updateExpensesTable() {
             $.ajax({
                 url: '/view_expenses',
@@ -302,6 +298,43 @@
                 }
             });
         }
+
+        $('#budgetsTable').on('click', '.update-budget', function () {
+            const budgetId = $(this).data('id');
+            $.ajax({
+                url: `/get_budget/${budgetId}`,
+                method: 'GET',
+                success: function (response) {
+                    // Fill the update budget modal with data
+                    $('#updateBudgetModal #budgetId').val(response.id);
+                    $('#updateBudgetModal #categoryId').val(response.categoryId);
+                    $('#updateBudgetModal #budget_limit').val(response.budget_limit);
+                    $('#updateBudgetModal').modal('show');
+                },
+                error: function (xhr) {
+                    alert('Error fetching budget data: ' + (xhr.responseJSON?.error || xhr.statusText));
+                }
+            });
+        });
+
+        // Handle "Update Budget" form submission
+        $('#updateBudgetForm').on('submit', function (e) {
+            e.preventDefault();
+            const formData = $(this).serialize();
+            $.ajax({
+                url: '/update_budget',
+                method: 'PUT',
+                data: formData,
+                success: function (response) {
+                    alert(response.message);
+                    $('#updateBudgetModal').modal('hide');
+                    updateBudgetDisplay();
+                },
+                error: function (xhr) {
+                    alert('Error updating budget: ' + (xhr.responseJSON?.error || xhr.statusText));
+                }
+            });
+        });
 
         // Initial fetch of expenses and budgets
         updateExpensesTable();
@@ -390,7 +423,7 @@
             }
         });
 
-        // Handle editing an expense
+        // Handle "Edit Expense"
         $('#expensesTable').on('click', '.edit-expense', function () {
             var data = table.row($(this).parents('tr')).data();
             $('#editExpenseModal #id').val(data.id);
@@ -403,26 +436,31 @@
 
         // Handle form submission for editing an expense
         $('#editExpenseForm').on('submit', function (e) {
-            e.preventDefault(); // Prevent default form submission
-
-            const form = $(this);
-            const url = form.attr('action'); // Backend route
-            const method = form.attr('method'); // POST
-            const data = form.serialize(); // Serialize form data
-
+            e.preventDefault();
+            const formData = $(this).serialize();
             $.ajax({
-                url: url,
-                method: method,
-                data: data,
+                url: '/edit_expense',
+                method: 'PUT',
+                data: formData,
                 success: function (response) {
-                    alert(response.message); // Show success message
-                    $('#editExpenseModal').modal('hide'); // Hide the modal
-                    updateExpensesTable(); // Refresh expenses table
+                    alert(response.message);
+                    $('#editExpenseModal').modal('hide');
+                    updateExpensesTable();
                 },
                 error: function (xhr) {
-                    alert('Error: ' + (xhr.responseJSON?.error || xhr.statusText)); // Show error
+                    alert('Error: ' + (xhr.responseJSON?.error || xhr.statusText));
                 }
             });
+        });
+
+        // Handle budget-related modals
+        $('#setBudgetModal, #updateBudgetModal, #deleteBudgetModal').on('show.bs.modal', function (event) {
+            var button = $(event.relatedTarget);
+            var categoryId = button.data('category');
+            var categoryName = button.data('category-name');
+            var modal = $(this);
+            modal.find('.modal-body #categoryId').val(categoryId);
+            modal.find('.modal-title span').text(categoryName);
         });
     });
 </script>
