@@ -1,0 +1,41 @@
+<!-- templates/modals/edit_expense_modal.html -->
+<div class="modal fade" id="editExpenseModal" tabindex="-1" aria-labelledby="editExpenseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editExpenseModalLabel">Edit Expense</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('edit_expense') }}" method="post">
+                    <div class="mb-3">
+                        <label for="id" class="form-label">Expense ID</label>
+                        <input type="text" class="form-control" id="id" name="id" required readonly>
+                    </div>
+                    <div class="mb-3">
+                        <label for="amount" class="form-label">New Amount</label>
+                        <input type="number" class="form-control" id="amount" name="amount" step="0.01">
+                    </div>
+                    <div class="mb-3">
+                        <label for="date" class="form-label">New Date</label>
+                        <input type="date" class="form-control" id="date" name="date">
+                    </div>
+                    <div class="mb-3">
+                        <label for="description" class="form-label">New Description</label>
+                        <input type="text" class="form-control" id="description" name="description">
+                    </div>
+                    <div class="mb-3">
+                        <label for="categoryId" class="form-label">New Category</label>
+                        <select class="form-control" id="categoryId" name="categoryId" required>
+                            <option value="1">Food</option>
+                            <option value="2">Transport</option>
+                            <option value="3">Entertainment</option>
+                            <option value="4">Other</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-warning">Edit Expense</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

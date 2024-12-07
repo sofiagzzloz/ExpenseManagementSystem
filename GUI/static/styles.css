@@ -114,3 +114,23 @@ h1, h2, h3 {
     text-align: center;
 }
 
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 20px;
+}
+
+th, td {
+    padding: 10px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+th {
+    background-color: #f4f4f4;
+}
+
+.btn {
+    padding: 5px 10px;
+    font-size: 14px;
+}

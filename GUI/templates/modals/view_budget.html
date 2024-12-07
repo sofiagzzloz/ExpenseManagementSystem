@@ -1,0 +1,24 @@
+<!-- templates/modals/view_budget_modal.html -->
+<div class="modal fade" id="viewBudgetModal" tabindex="-1" aria-labelledby="viewBudgetModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewBudgetModalLabel">View Budget</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('view_budget') }}" method="get">
+                    <div class="mb-3">
+                        <label for="userId" class="form-label">User ID</label>
+                        <input type="text" class="form-control" id="userId" name="userId" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="categoryId" class="form-label">Category ID</label>
+                        <input type="text" class="form-control" id="categoryId" name="categoryId" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">View Budget</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,32 @@
+<!-- templates/modals/view_expense_modal.html -->
+<div class="modal fade" id="viewExpenseModal" tabindex="-1" aria-labelledby="viewExpenseModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewExpenseModalLabel">View Expenses</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form action="{{ url_for('view_expense') }}" method="get">
+                    <div class="mb-3">
+                        <label for="userId" class="form-label">User ID</label>
+                        <input type="text" class="form-control" id="userId" name="userId">
+                    </div>
+                    <div class="mb-3">
+                        <label for="categoryId" class="form-label">Category ID</label>
+                        <input type="text" class="form-control" id="categoryId" name="categoryId">
+                    </div>
+                    <div class="mb-3">
+                        <label for="startDate" class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="startDate" name="startDate">
+                    </div>
+                    <div class="mb-3">
+                        <label for="endDate" class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="endDate" name="endDate">
+                    </div>
+                    <button type="submit" class="btn btn-primary">View Expenses</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
